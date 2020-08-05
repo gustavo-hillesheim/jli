@@ -23,7 +23,8 @@ class JliTest {
     void shouldRunCommandCorrectly() throws JliException {
         new Jli()
             .registerCommand(SimpleCommand.class)
-            .getCommand("simple-command", "1" , "-bool");
+            .getCommand("simple-command", "1" , "-bool")
+            .run();
 
         Mockito.verify(mockedRunnable);
     }
