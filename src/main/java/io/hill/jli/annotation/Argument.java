@@ -5,11 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+import io.hill.jli.domain.ArgumentType;
+
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Command {
+public @interface Argument {
 
-    String name() default DEFAULT;
-
-    static String DEFAULT = "";
+    ArgumentType type() default ArgumentType.NAMED;
 }

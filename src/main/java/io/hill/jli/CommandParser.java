@@ -1,20 +1,26 @@
 package io.hill.jli;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.hill.jli.domain.CommandDefinition;
 
 class CommandParser {
 
+    private static final String NAMED_PARAMETER_SIGN = "-";
+    private static final String NAMED_PARAMETER_SEPARATOR = "=";
+
     public CommandDefinition parseCommand(String[] args) {
         String[] commandSegments = getCommandSegments(args);
         Map<String, String> namedArguments = getNamedArguments(commandSegments);
         List<String> positionalArguments = getPositionalArguments(commandSegments);
+        String commandName = positionalArguments.get(0);
+        positionalArguments = positionalArguments.subList(1, positionalArguments.size());
 
-        return new CommandDefinition(positionalArguments.get(0), namedArguments, positionalArguments);
+        return new CommandDefinition(commandName, namedArguments, positionalArguments);
     }
 
     String[] getCommandSegments(String[] args) {
@@ -61,11 +67,24 @@ class CommandParser {
         return commandSegments.toArray(new String[]{});
     }
 
-    private Map<String, String> getNamedArguments(String[] commandSegments) {
-        return new HashMap<>();
+    Map<String, String> getNamedArguments(String[] commandSegments) {
+        return Stream.of(commandSegments)
+            .filter(segment -> segment.startsWith(NAMED_PARAMETER_SIGN))
+            .map(segment -> segment.substring(1))
+            .collect(Collectors.toMap(
+                segment -> segment.split(NAMED_PARAMETER_SEPARATOR)[0],
+                segment -> {
+                    if (segment.contains(NAMED_PARAMETER_SEPARATOR)) {
+                        return segment.split(NAMED_PARAMETER_SEPARATOR)[1];
+                    }
+                    return Boolean.TRUE.toString();
+                }
+            ));
     }
 
-    private List<String> getPositionalArguments(String[] commandSegments) {
-        return new ArrayList<>();
+    List<String> getPositionalArguments(String[] commandSegments) {
+        return Stream.of(commandSegments)
+            .filter(segment -> !segment.startsWith(NAMED_PARAMETER_SIGN))
+            .collect(Collectors.toList());
     }
 }
