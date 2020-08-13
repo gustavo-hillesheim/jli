@@ -14,12 +14,12 @@ public class ArgumentBinder {
 
     private ArgumentConverter argumentConverter = new ArgumentConverter();
 
-    void bindArguments(Runnable target, CommandDefinition commandDefinition) throws JliException {
+    void bindArguments(Object target, CommandDefinition commandDefinition) throws JliException {
         bindPositionalArguments(target, commandDefinition.getPositionalArguments());
         bindNamedArguments(target, commandDefinition.getNamedArguments());
     }
 
-    void bindPositionalArguments(Runnable target, List<String> arguments) throws JliException {
+    void bindPositionalArguments(Object target, List<String> arguments) throws JliException {
         List<Field> fields = getFieldsByType(target, ArgumentType.POSITIONAL);
         for (int i = 0; i < arguments.size() && i < fields.size(); i++) {
             Field field = fields.get(i);
@@ -30,7 +30,7 @@ public class ArgumentBinder {
         }
     }
 
-    void bindNamedArguments(Runnable target, Map<String, String> arguments) throws JliException {
+    void bindNamedArguments(Object target, Map<String, String> arguments) throws JliException {
         List<Field> fields = getFieldsByType(target, ArgumentType.NAMED);
         for (Field field : fields) {
             String fieldName = field.getName();
@@ -41,7 +41,7 @@ public class ArgumentBinder {
         }
     }
 
-    private void trySetValue(Runnable target, Field field, String argument) throws JliException {
+    private void trySetValue(Object target, Field field, String argument) throws JliException {
         try {
             field.set(target, convertValue(argument, field.getType()));
 
@@ -62,7 +62,7 @@ public class ArgumentBinder {
         return value;
     }
 
-    private List<Field> getFieldsByType(Runnable target, ArgumentType type) {
+    private List<Field> getFieldsByType(Object target, ArgumentType type) {
         return Stream.of(target.getClass().getDeclaredFields())
             .filter(field -> field.getAnnotation(Argument.class) != null)
             .filter(field -> type == field.getAnnotation(Argument.class).type())

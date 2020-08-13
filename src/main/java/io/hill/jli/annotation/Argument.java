@@ -12,4 +12,7 @@ import io.hill.jli.domain.ArgumentType;
 public @interface Argument {
 
     ArgumentType type() default ArgumentType.NAMED;
+    int position() default DECLARATION_ORDER;
+
+    int DECLARATION_ORDER = -1;
 }

@@ -1,6 +1,29 @@
 package io.hill.jli;
 
+import java.lang.reflect.Array;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class ArgumentConverter {
+
+    public <T> T convertToType(List<String> values, Class<T> type) throws JliException {
+        if (type.isArray()) {
+            return (T) convertListValuesToType(values, type.getComponentType());
+
+        } else if (values.size() == 1) {
+            return convertToType(values.get(0), type);
+        }
+        throw new JliException(String.format("Could not convert values [%s] to type %s since neither " +
+            "type is an array nor the values have only one entry", String.join(", ", values), type.getCanonicalName()));
+    }
+
+    private <T> T[] convertListValuesToType(List<String> values, Class<T> type) {
+        return values
+            .stream()
+            .map(value -> convertToType(value, type))
+            .collect(Collectors.toList())
+            .toArray((T[]) Array.newInstance(type, 0));
+    }
 
     @SuppressWarnings("unchecked")
     public <T> T convertToType(String value, Class<T> type) {

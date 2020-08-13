@@ -1,8 +1,10 @@
 package io.hill.jli;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,14 +15,32 @@ class CommandParser {
     private static final String NAMED_PARAMETER_SIGN = "-";
     private static final String NAMED_PARAMETER_SEPARATOR = "=";
 
-    public CommandDefinition parseCommand(String[] args) {
+    public CommandDefinition parseCommand(String[] args, Jli jli) {
         String[] commandSegments = getCommandSegments(args);
         Map<String, String> namedArguments = getNamedArguments(commandSegments);
         List<String> positionalArguments = getPositionalArguments(commandSegments);
         String commandName = positionalArguments.get(0);
         positionalArguments = positionalArguments.subList(1, positionalArguments.size());
+        Class<?> argumentsType = getArgumentsType(jli.getCommandClass(commandName));
 
-        return new CommandDefinition(commandName, namedArguments, positionalArguments);
+        return new CommandDefinition(commandName, namedArguments, positionalArguments, argumentsType);
+    }
+
+    private Class<?> getArgumentsType(Class<?> commandClass) {
+        if (Consumer.class.isAssignableFrom(commandClass)) {
+            Class<?> mostSpecificParameterType = null;
+            for (Method method : commandClass.getDeclaredMethods()) {
+                if (!"accept".equals(method.getName())) {
+                    continue;
+                }
+                Class<?> methodParameterType = method.getParameterTypes()[0];
+                if (mostSpecificParameterType == null || mostSpecificParameterType.isAssignableFrom(methodParameterType)) {
+                    mostSpecificParameterType = methodParameterType;
+                }
+            }
+            return mostSpecificParameterType;
+        }
+        return null;
     }
 
     String[] getCommandSegments(String[] args) {

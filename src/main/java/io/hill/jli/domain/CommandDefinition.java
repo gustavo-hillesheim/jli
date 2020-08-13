@@ -17,4 +17,9 @@ public class CommandDefinition {
     private String command;
     private Map<String, String> namedArguments;
     private List<String> positionalArguments;
+
+    /**
+     * Only available when command implements {@link java.util.function.Consumer}
+     */
+    private Class<?> argumentsType;
 }

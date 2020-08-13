@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class CommandFactory {
 
-    Runnable createCommand(Class<? extends Runnable> commandClass) throws JliException {
+    Object createCommand(Class<?> commandClass) throws JliException {
         try {
             return commandClass.getConstructor().newInstance();
 
